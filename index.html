@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Application</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #34495e;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dcdde1;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #27ae60;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #219653;
+        }
+        .switch-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .switch-text span {
+            color: #27ae60;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .error-msg {
+            color: #e74c3c;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .success-msg {
+            color: #27ae60;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- FORMULAIRE DE CONNEXION -->
+        <div id="login-section">
+            <h2>Connexion</h2>
+            <div id="login-error" class="error-msg"></div>
+            <div class="form-group">
+                <label for="login-username">Nom d'utilisateur</label>
+                <input type="text" id="login-username" placeholder="Entrez votre pseudo">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Mot de passe</label>
+                <input type="password" id="login-password" placeholder="Entrez votre mot de passe">
+            </div>
+            <button onclick="handleLogin()">Se connecter</button>
+            <div class="switch-text">
+                Pas encore de compte ? <span onclick="toggleForms()">S'inscrire</span>
+            </div>
+        </div>
+
+        <!-- FORMULAIRE D'INSCRIPTION -->
+        <div id="register-section" class="hidden">
+            <h2>Créer un compte</h2>
+            <div id="register-error" class="error-msg"></div>
+            <div id="register-success" class="success-msg"></div>
+            <div class="form-group">
+                <label for="reg-username">Nom d'utilisateur</label>
+                <input type="text" id="reg-username" placeholder="Choisissez un pseudo">
+            </div>
+            <div class="form-group">
+                <label for="reg-password">Mot de passe</label>
+                <input type="password" id="reg-password" placeholder="Choisissez un mot de passe">
+            </div>
+            <button onclick="handleRegister()">S'inscrire</button>
+            <div class="switch-text">
+                Déjà un compte ? <span onclick="toggleForms()">Se connecter</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Basculer entre Connexion et Inscription
+        function toggleForms() {
+            const loginSec = document.getElementById('login-section');
+            const regSec = document.getElementById('register-section');
+            loginSec.classList.toggle('hidden');
+            regSec.classList.toggle('hidden');
+            
+            // Nettoyer les messages
+            document.getElementById('login-error').innerText = '';
+            document.getElementById('register-error').innerText = '';
+            document.getElementById('register-success').innerText = '';
+        }
+
+        // Gérer l'inscription
+        function handleRegister() {
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            const errorDiv = document.getElementById('register-error');
+            const successDiv = document.getElementById('register-success');
+
+            errorDiv.innerText = '';
+            successDiv.innerText = '';
+
+            if (!username || !password) {
+                errorDiv.innerText = "Veuillez remplir tous les champs.";
+                return;
+            }
+
+            // Récupérer les utilisateurs existants ou initialiser un tableau
+            let users = JSON.parse(localStorage.getItem('app_users')) || [];
+
+            // Vérifier si le pseudo existe déjà
+            const userExists = users.some(u => u.username === username);
+            if (userExists) {
+                errorDiv.innerText = "Ce nom d'utilisateur est déjà pris.";
+                return;
+            }
+
+            // Enregistrer le nouvel utilisateur
+            users.push({ username, password });
+            localStorage.setItem('app_users', JSON.stringify(users));
+
+            successDiv.innerText = "Compte créé avec succès ! Connectez-vous.";
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-password').value = '';
+
+            setTimeout(() => {
+                toggleForms();
+            }, 1500);
+        }
+
+        // Gérer la connexion
+        function handleLogin() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const errorDiv = document.getElementById('login-error');
+
+            errorDiv.innerText = '';
+
+            if (!username || !password) {
+                errorDiv.innerText = "Veuillez remplir tous les champs.";
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('app_users')) || [];
+
+            // Vérifier les identifiants
+            const validUser = users.find(u => u.username === username && u.password === password);
+
+            if (validUser) {
+                // Sauvegarder la session active
+                localStorage.setItem('current_user', username);
+                // Rediriger vers la page principale de l'application (que nous créerons juste après)
+                window.location.href = "app.html";
+            } else {
+                errorDiv.innerText = "Nom d'utilisateur ou mot de passe incorrect.";
+            }
+        }
+    </script>
+</body>
+</html>
